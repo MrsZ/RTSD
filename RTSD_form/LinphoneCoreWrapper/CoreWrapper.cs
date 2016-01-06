@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace LinphoneCoreWrapper
 {
-    public class Class1
+    public class CoreWrapper
     {
+
     }
 }

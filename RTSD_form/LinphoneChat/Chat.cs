@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LinphoneChat
 {
-    public class Class1
+    public class Chat
     {
     }
 }
