@@ -59,5 +59,10 @@ namespace RTSD_form
         {
             this.Close();
         }
+
+        private void label_login_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }

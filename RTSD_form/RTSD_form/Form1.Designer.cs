@@ -237,13 +237,14 @@
             // 
             this.label_login.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label_login.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.label_login.Font = new System.Drawing.Font("MS Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_login.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_login.Location = new System.Drawing.Point(399, 15);
             this.label_login.Name = "label_login";
             this.label_login.Size = new System.Drawing.Size(247, 16);
             this.label_login.TabIndex = 3;
             this.label_login.Text = "Not logged in";
             this.label_login.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.label_login.Click += new System.EventHandler(this.label_login_Click_1);
             // 
             // richTextBox_log
             // 
