@@ -5,6 +5,14 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSD_form", "RTSD_form\RTSD_form.csproj", "{B156926D-EC3D-45DD-8482-9D9255BE9214}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinphoneAccount", "LinphoneAccount\LinphoneAccount.csproj", "{B755AE95-F0AA-4E6A-A85C-30172CC4B5C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinphoneCall", "LinphoneCall\LinphoneCall.csproj", "{474D7CF6-1616-4FB0-8834-00A169D751D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinphoneChat", "LinphoneChat\LinphoneChat.csproj", "{80C3B716-8C72-43C5-A8C6-51EDAD24D556}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinphoneCoreWrapper", "LinphoneCoreWrapper\LinphoneCoreWrapper.csproj", "{EC14448A-DF0D-4415-BA1F-F4A7426E2549}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{B156926D-EC3D-45DD-8482-9D9255BE9214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B156926D-EC3D-45DD-8482-9D9255BE9214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B156926D-EC3D-45DD-8482-9D9255BE9214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B755AE95-F0AA-4E6A-A85C-30172CC4B5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B755AE95-F0AA-4E6A-A85C-30172CC4B5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B755AE95-F0AA-4E6A-A85C-30172CC4B5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B755AE95-F0AA-4E6A-A85C-30172CC4B5C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{474D7CF6-1616-4FB0-8834-00A169D751D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{474D7CF6-1616-4FB0-8834-00A169D751D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{474D7CF6-1616-4FB0-8834-00A169D751D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{474D7CF6-1616-4FB0-8834-00A169D751D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80C3B716-8C72-43C5-A8C6-51EDAD24D556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80C3B716-8C72-43C5-A8C6-51EDAD24D556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80C3B716-8C72-43C5-A8C6-51EDAD24D556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80C3B716-8C72-43C5-A8C6-51EDAD24D556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC14448A-DF0D-4415-BA1F-F4A7426E2549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC14448A-DF0D-4415-BA1F-F4A7426E2549}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC14448A-DF0D-4415-BA1F-F4A7426E2549}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC14448A-DF0D-4415-BA1F-F4A7426E2549}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

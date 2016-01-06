@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RTSD_form</RootNamespace>
     <AssemblyName>RTSD_form</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,6 +75,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -87,6 +89,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LinphoneAccount\LinphoneAccount.csproj">
+      <Project>{b755ae95-f0aa-4e6a-a85c-30172cc4b5c3}</Project>
+      <Name>LinphoneAccount</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LinphoneCall\LinphoneCall.csproj">
+      <Project>{474d7cf6-1616-4fb0-8834-00a169d751d9}</Project>
+      <Name>LinphoneCall</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LinphoneChat\LinphoneChat.csproj">
+      <Project>{80c3b716-8c72-43c5-a8c6-51edad24d556}</Project>
+      <Name>LinphoneChat</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

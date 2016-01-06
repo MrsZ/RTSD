@@ -265,10 +265,10 @@
             // 
             // label2
             // 
-            this.label2.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(574, 65);
+            this.label2.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(574, 58);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(280, 15);
+            this.label2.Size = new System.Drawing.Size(280, 22);
             this.label2.TabIndex = 4;
             this.label2.Text = "Event Log";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
