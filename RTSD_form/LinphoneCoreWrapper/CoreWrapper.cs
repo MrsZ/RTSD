@@ -99,15 +99,31 @@ namespace LinphoneCoreWrapper
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr linphone_core_new(IntPtr vtable, string config_path, string factory_config_path, IntPtr userdata);
 
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr linphone_core_get_chat_room_from_uri(IntPtr lc, string contact);
+
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern IntPtr linphone_chat_room_create_message(IntPtr ChatRoom, string message);
+
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void linphone_chat_room_send_chat_message(IntPtr ChatRoom, IntPtr ChatMessage);
+
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void linphone_chat_room_destroy(IntPtr ChatRoom);
+
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void LinphoneCoreRegistrationStateChangedCb(IntPtr lc, IntPtr cfg, LinphoneRegistrationState cstate, string message);
 
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void LinphoneCoreCallStateChangedCb(IntPtr lc, IntPtr call, LinphoneCallState cstate, string message);
 
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void LinphoneCoreMessageReceivedCb(IntPtr lc, IntPtr room, IntPtr message);
+
 		#endregion
 
 		LinphoneCoreRegistrationStateChangedCb registration_state_changed;
+		LinphoneCoreMessageReceivedCb message_received;
 		//LinphoneCoreCallStateChangedCb call_state_changed; // TODO. remember to add into vtable;
 		IntPtr linphoneCore;
 		IntPtr vtablePtr;
@@ -120,6 +136,7 @@ namespace LinphoneCoreWrapper
 		{
 			this.running = true;
 			this.registration_state_changed = new LinphoneCoreRegistrationStateChangedCb(OnRegistrationChanged);
+			this.message_received = new LinphoneCoreMessageReceivedCb(OnMessageReceive);
 			this.vtable = new LinphoneCoreVTable()
 			{
 				global_state_changed = IntPtr.Zero,
@@ -129,7 +146,7 @@ namespace LinphoneCoreWrapper
 				new_subscription_requested = IntPtr.Zero,
 				auth_info_requested = IntPtr.Zero,
 				call_log_updated = IntPtr.Zero,
-				message_received = IntPtr.Zero,
+				message_received = Marshal.GetFunctionPointerForDelegate(message_received),
 				is_composing_received = IntPtr.Zero,
 				dtmf_received = IntPtr.Zero,
 				refer_received = IntPtr.Zero,
@@ -155,6 +172,7 @@ namespace LinphoneCoreWrapper
 				log_collection_upload_state_changed = IntPtr.Zero,
 				log_collection_upload_progress_indication = IntPtr.Zero
 			};
+
 			this.vtablePtr = Marshal.AllocHGlobal(Marshal.SizeOf(this.vtable));
 			Marshal.StructureToPtr(vtable, this.vtablePtr, false);
 
@@ -162,8 +180,7 @@ namespace LinphoneCoreWrapper
 
 			// TODO: Add coreloop and defaultparams.
 
-		}
-			
+					
 		public void destroyPhone()
 		{
 			if (this.RegistrationStateChangedEvent != null)
@@ -192,5 +209,9 @@ namespace LinphoneCoreWrapper
 		}
 
 		// TODO: Add OnCallStateChanged and OnChatMessageStateChanged.
+
+		void OnMessageReceive(IntPtr lc, LinphoneChat* chat_room, LinphoneAddress* from, LinphoneChatMessage* msg) {
+			//TODO: Put message to chat window
+		}
     }
 }
