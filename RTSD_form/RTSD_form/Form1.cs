@@ -8,10 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using LinphoneAccount;
+using LinphonePhone;
+
 namespace RTSD_form
 {
     public partial class Form1 : Form
     {
+        Phone phone;
 		LinphoneAccount.Account account;
 
         public Form1()
@@ -19,6 +23,10 @@ namespace RTSD_form
             InitializeComponent();
             tabPage_calls.Enabled = false;
             tabPage_chats.Enabled = false;
+
+            this.account = new Account("olkorhon", "3g75agf4", "sip.linphone.org");
+            phone = new Phone(account);
+            phone.Connect();
         }
 
         private void tabPage_chats_Click(object sender, EventArgs e)
