@@ -103,6 +103,10 @@
       <Project>{80c3b716-8c72-43c5-a8c6-51edad24d556}</Project>
       <Name>LinphoneChat</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LinphonePhone\LinphonePhone.csproj">
+      <Project>{2bd08636-61ae-4817-b968-28aed1c096db}</Project>
+      <Name>LinphonePhone</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
