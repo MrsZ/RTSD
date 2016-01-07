@@ -59,7 +59,7 @@ namespace RTSD_form
 							login_dialog.textBox2.Text,
 							"sip.linphone.org");
 
-						this.phone = new Phone();
+						this.phone = new Phone(this.account);
 						this.phone.Connect();
 
 						tabPage_calls.Enabled = true;
