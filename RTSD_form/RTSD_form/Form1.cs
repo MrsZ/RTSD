@@ -16,17 +16,13 @@ namespace RTSD_form
     public partial class Form1 : Form
     {
         Phone phone;
-		LinphoneAccount.Account account;
+		Account account;
 
         public Form1()
         {
             InitializeComponent();
             tabPage_calls.Enabled = false;
             tabPage_chats.Enabled = false;
-
-            this.account = new Account("olkorhon", "3g75agf4", "sip.linphone.org");
-            phone = new Phone(account);
-            phone.Connect();
         }
 
         private void tabPage_chats_Click(object sender, EventArgs e)
@@ -62,6 +58,9 @@ namespace RTSD_form
 							login_dialog.textBox1.Text,
 							login_dialog.textBox2.Text,
 							"sip.linphone.org");
+
+						this.phone = new Phone();
+						this.phone.Connect();
 
 						tabPage_calls.Enabled = true;
 						tabPage_chats.Enabled = true;
