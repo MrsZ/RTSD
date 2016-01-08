@@ -91,21 +91,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LinphoneAccount\LinphoneAccount.csproj">
-      <Project>{b755ae95-f0aa-4e6a-a85c-30172cc4b5c3}</Project>
-      <Name>LinphoneAccount</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LinphoneCall\LinphoneCall.csproj">
-      <Project>{474d7cf6-1616-4fb0-8834-00a169d751d9}</Project>
-      <Name>LinphoneCall</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LinphoneChat\LinphoneChat.csproj">
-      <Project>{80c3b716-8c72-43c5-a8c6-51edad24d556}</Project>
-      <Name>LinphoneChat</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LinphonePhone\LinphonePhone.csproj">
-      <Project>{2bd08636-61ae-4817-b968-28aed1c096db}</Project>
-      <Name>LinphonePhone</Name>
+    <ProjectReference Include="..\LinphoneCoreWrapper\LiblinphonedotNET.csproj">
+      <Project>{ec14448a-df0d-4415-ba1f-f4a7426e2549}</Project>
+      <Name>LiblinphonedotNET</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

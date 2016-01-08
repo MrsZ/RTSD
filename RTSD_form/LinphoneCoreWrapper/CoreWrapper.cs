@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
 
-using LinphoneCall;
-
-namespace LinphoneCoreWrapper
+namespace LiblinphonedotNET
 {
     public class CoreWrapper
     {
@@ -57,7 +55,7 @@ namespace LinphoneCoreWrapper
 			LinphoneRegistrationCleared, // Unregistration succeeded
 			LinphoneRegistrationFailed	// Registration failed
 		};
-
+		/*
 		public enum LinphoneChatMessageState
 		{
 			LinphoneChatMessageStateIdle, // Initial state
@@ -67,7 +65,7 @@ namespace LinphoneCoreWrapper
 			LinphoneChatMessageStateFileTransferError, // Message was received(and acknowledged) but cannot get file from server
 			LinphoneChatMessageStateFileTransferDone // File transfer has been completed successfully.
 		};
-
+		*/
 		struct LinphoneCoreVTable
 		{
 			public IntPtr global_state_changed; // Notifies global state changes
@@ -120,7 +118,7 @@ namespace LinphoneCoreWrapper
         public static extern void linphone_core_set_user_agent(IntPtr lc, string ua_name, string version);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr linphone_core_create_default_call_parameters(IntPtr lc);
+        public static extern IntPtr linphone_core_create_call_params(IntPtr lc, IntPtr call);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_call_params_enable_video(IntPtr calls_def_params, bool isEnabled);
@@ -175,6 +173,9 @@ namespace LinphoneCoreWrapper
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void linphone_chat_room_send_chat_message(IntPtr ChatRoom, IntPtr ChatMessage);
+
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern string linphone_chat_message_get_text(IntPtr ChatMessage);
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void linphone_chat_room_destroy(IntPtr ChatRoom);
@@ -298,7 +299,7 @@ namespace LinphoneCoreWrapper
             linphone_core_set_sip_transports(linphoneCore, t_configPtr);
             linphone_core_set_user_agent(linphoneCore, agent, version);
 
-            calls_default_params = linphone_core_create_default_call_parameters(linphoneCore);
+            calls_default_params = linphone_core_create_call_params(linphoneCore, IntPtr.Zero);
             linphone_call_params_enable_video(calls_default_params, false);
             linphone_call_params_enable_early_media_sending(calls_default_params, true); //Test if absolutely necessary
 
@@ -366,8 +367,43 @@ namespace LinphoneCoreWrapper
             }
         }
 
-        public delegate void RegistrationStateChangedDelegate(LinphoneRegistrationState state);
+		public IntPtr createChatRoom(string uri)
+		{
+			IntPtr chat_room = linphone_core_get_chat_room_from_uri(linphoneCore, uri);
+
+			if (chat_room == IntPtr.Zero) {
+				throw new Exception("HAHa bad chat target");
+			} else {
+				return chat_room;
+			}
+		}
+
+		public void destroyChat(IntPtr chat_room)
+		{
+			linphone_chat_room_destroy(chat_room);
+		}
+
+		public void sendMessage(IntPtr chat_room, string msg)
+		{
+			IntPtr msg_to_send = linphone_chat_room_create_message(chat_room, msg);
+			linphone_chat_room_send_chat_message(chat_room, msg_to_send);
+		}
+
+		
+		public delegate void RegistrationStateChangedDelegate(LinphoneRegistrationState state);
 		public event RegistrationStateChangedDelegate RegistrationStateChangedEvent;
+
+		public delegate void MessageReceivedDelegate(string message);
+		public event MessageReceivedDelegate MessageReceivedEvent;
+
+		void OnMessageReceived(IntPtr lc, IntPtr chat_room, IntPtr msg)
+		{
+			//TODO: add functionality
+			string tmp = linphone_chat_message_get_text(msg);
+			if (MessageReceivedEvent != null) {
+				MessageReceivedEvent(tmp);
+			}
+		}
 
 		// TODO: Add CallStateChangedEvent and ChatMessageChangedEvent.
 
@@ -475,9 +511,5 @@ namespace LinphoneCoreWrapper
                 }
             }
         }
-		void OnMessageReceived(IntPtr lc, IntPtr chat_room, IntPtr msg) {
-			//TODO: add functionality
-        }
-
     }
 }

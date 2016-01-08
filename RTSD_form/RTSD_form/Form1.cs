@@ -9,8 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using LinphoneAccount;
-using LinphonePhone;
+using LiblinphonedotNET;
 
 namespace RTSD_form
 {
@@ -21,6 +20,7 @@ namespace RTSD_form
 
         Phone phone;
 		Account account;
+		Chat chat;
 
         public Form1()
         {
@@ -62,13 +62,13 @@ namespace RTSD_form
                     {
                         if (login_dialog.textBox1.Text.Length != 0)
                         {
-                            this.account = new LinphoneAccount.Account(login_dialog.textBox1.Text,
+                            this.account = new Account(login_dialog.textBox1.Text,
                                                                        login_dialog.textBox2.Text,
                                                                        "sip.linphone.org");
 
                             this.phone = new Phone(this.account);
                             phone.ConnectedEvent += delegate () { connectedEvent(); };
-                            phone.ConnectedEvent += delegate () { connectedEvent(); };
+                            //phone.ConnectedEvent += delegate () { connectedEvent(); };
                             this.phone.Connect();
 
                             label_login.Text = "Connecting...";
@@ -105,7 +105,28 @@ namespace RTSD_form
             label_status_message.Text = text;
         }
 
+		private void create_chat_room_button_Click(object sender, EventArgs e)
+		{
+			string target_addr = target_sip_addr_textbox.Text;
 
+			phone.CreateChatRoom(target_addr);
 
-    }
+		}
+
+		private void send_chat_message_button_Click(object sender, EventArgs e)
+		{
+			string message_to_send = compose_chat_message_textbox.Text;
+
+			phone.SendMessage(message_to_send);
+
+			compose_chat_message_textbox.Text = "";
+
+			chat_log_textbox.Text += "\n" + "You said: " + message_to_send;
+        }
+
+		private void chat_message_received(string message)
+		{
+			
+		}
+	}
 }
