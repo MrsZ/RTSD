@@ -18,6 +18,7 @@ namespace LinphoneCall
         public enum State
         {
             None,
+            Ringing,
             Loading,
             Active,
             Completed,

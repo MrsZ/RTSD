@@ -39,6 +39,7 @@ namespace LinphonePhone
         public delegate void OnIncomingCall(Call call);
         public delegate void OnCallActive(Call call);
         public delegate void OnCallCompleted(Call call);
+        public delegate void OnCallRinging(Call call);
         public delegate void OnError(Call call, Error error);
 
         public event OnPhoneConnected ConnectedEvent;
@@ -46,9 +47,8 @@ namespace LinphonePhone
         public event OnIncomingCall CallIncomingEvent;
         public event OnCallActive CallActiveEvent;
         public event OnCallCompleted CallCompletedEvent;
+        public event OnCallRinging CallRingingEvent;
         public event OnError ErrorEvent;
-
-        private bool running;
 
         private ConnectState connectState;
         private LineState line_state;
@@ -115,6 +115,12 @@ namespace LinphonePhone
                         line_state = LineState.Busy;
                         if (CallActiveEvent != null)
                             CallActiveEvent(call);
+                        break;
+
+                    case Call.State.Ringing:
+                        line_state = LineState.Busy;
+                        if (CallRingingEvent != null)
+                            CallRingingEvent(call);
                         break;
 
                     case Call.State.Loading:

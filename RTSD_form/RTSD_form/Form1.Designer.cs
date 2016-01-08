@@ -116,7 +116,6 @@
             this.label_status_message.TabIndex = 4;
             this.label_status_message.Text = "Trolling";
             this.label_status_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label_status_message.Click += new System.EventHandler(this.label_status_message_Click);
             // 
             // button_call
             // 

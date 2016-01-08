@@ -164,7 +164,10 @@ namespace LinphoneCoreWrapper
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_call_stop_recording(IntPtr call);
 
-		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void linphone_core_accept_call(IntPtr lc, IntPtr call);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr linphone_core_get_chat_room_from_uri(IntPtr lc, string contact);
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -399,6 +402,10 @@ namespace LinphoneCoreWrapper
             switch (cstate)
             {
                 case LinphoneCallState.LinphoneCallIncomingReceived:
+                    newstate = Call.State.Ringing;
+                    linphone_core_accept_call(linphoneCore, call);
+                    break;
+
                 case LinphoneCallState.LinphoneCallIncomingEarlyMedia:
                     newstate = Call.State.Loading;
                     newtype = Call.CallType.Incoming;
@@ -417,6 +424,9 @@ namespace LinphoneCoreWrapper
                 case LinphoneCallState.LinphoneCallOutgoingInit:
                 case LinphoneCallState.LinphoneCallOutgoingProgress:
                 case LinphoneCallState.LinphoneCallOutgoingRinging:
+                    newstate = Call.State.Ringing;
+                    break;
+
                 case LinphoneCallState.LinphoneCallOutgoingEarlyMedia:
                     newstate = Call.State.Loading;
                     newtype = Call.CallType.Outcoming;

@@ -42,24 +42,6 @@ namespace RTSD_form
             button_login_logout.Invoke(new changeControlAvailability(updateLoginAvailability), new object[] { true });
         }
 
-        private void updateTabPageCallsAvailability(bool isAvailable)
-        {
-            tabPage_calls.Enabled = isAvailable;
-        }
-        private void updateTabPageChatsAvailability(bool isAvailable)
-        {
-            tabPage_chats.Enabled = isAvailable;
-        }
-        private void updateLoginAvailability(bool isAvailable)
-        {
-            button_login_logout.Enabled = isAvailable;
-        }
-
-        private void changeLoginText(string text)
-        {
-            label_login.Text = text;
-        }
-
         private void button_login_logout_Click(object sender, EventArgs e)
         {
             if (button_login_logout.Text == "Logout")
@@ -77,35 +59,53 @@ namespace RTSD_form
             switch (login_dialog.ShowDialog())
             {
                 case DialogResult.OK:
-                {
-					if (login_dialog.textBox1.Text.Length != 0)
-					{
-						this.account = new LinphoneAccount.Account(login_dialog.textBox1.Text,
-							                                       login_dialog.textBox2.Text,
-							                                       "sip.linphone.org");
- 
-						this.phone = new Phone(this.account);
-                        phone.ConnectedEvent += delegate () { connectedEvent(); };
-                        phone.ConnectedEvent += delegate () { connectedEvent(); };
-                        this.phone.Connect();
+                    {
+                        if (login_dialog.textBox1.Text.Length != 0)
+                        {
+                            this.account = new LinphoneAccount.Account(login_dialog.textBox1.Text,
+                                                                       login_dialog.textBox2.Text,
+                                                                       "sip.linphone.org");
 
-                        label_login.Text = "Connecting...";
-                        button_login_logout.Text = "Logout";
-                        button_login_logout.Enabled = false;
+                            this.phone = new Phone(this.account);
+                            phone.ConnectedEvent += delegate () { connectedEvent(); };
+                            phone.ConnectedEvent += delegate () { connectedEvent(); };
+                            this.phone.Connect();
+
+                            label_login.Text = "Connecting...";
+                            button_login_logout.Text = "Logout";
+                            button_login_logout.Enabled = false;
+                        }
+                        break;
                     }
-					break;
-                }
             }
         }
-
-        private void label_status_message_Click(object sender, EventArgs e)
+        private void updateTabPageCallsAvailability(bool isAvailable)
         {
-            this.Close();
+            tabPage_calls.Enabled = isAvailable;
+        }
+        private void updateTabPageChatsAvailability(bool isAvailable)
+        {
+            tabPage_chats.Enabled = isAvailable;
+        }
+        private void updateLoginAvailability(bool isAvailable)
+        {
+            button_login_logout.Enabled = isAvailable;
+        }
+        private void changeLoginText(string text)
+        {
+            label_login.Text = text;
         }
 
         private void button_call_Click(object sender, EventArgs e)
         {
             phone.MakeCall(textBox_call_address.Text);
         }
+        private void updateStatusLabel(string text)
+        {
+            label_status_message.Text = text;
+        }
+
+
+
     }
 }
