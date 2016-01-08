@@ -9,8 +9,9 @@ namespace LinphoneChat
 {
     public class Chat
     {
+        /*
         //sip-address of recipient. eg. "sip:joe@sip.linphone.org"
-        private string destination_addr { get {return destination_addr;} set {destination_addr = value} }
+        private string destination_addr { get {return destination_addr;} set { destination_addr = value; } }
 		private LinphoneChatRoom chat_room;
 
 		public Chat(IntPtr lc, string sip_addr) 
@@ -23,12 +24,12 @@ namespace LinphoneChat
             return linphone_core_get_chat_room_from_uri(IntPtr lc, addr);
         }
 
-		/*
+		/
         public bool show_received_message(IntPtr lc, LinphoneChat* chat_room, LinphoneAddress* from, LinphoneChatMessage* msg) {
 			//TODO: implement callback functionality
             return 0;
         }
-		*/
+		*
 
         public void send_message(LinphoneChatRoom* chat_room, LinphoneChatMessage msg) {
             LinphoneChatMessage msg_to_send = linphone_chat_room_create_message(chat_room, msg);
@@ -38,5 +39,6 @@ namespace LinphoneChat
 		public void destroy_chat(LinphoneChatRoom chat_room) {
 			linphone_chat_room_destroy(chat_room);
 		}
+        */
     }
 }

@@ -33,8 +33,8 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label_status = new System.Windows.Forms.Label();
             this.label_status_message = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button_call = new System.Windows.Forms.Button();
+            this.textBox_call_address = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_chats = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -73,8 +73,8 @@
             // tabPage_calls
             // 
             this.tabPage_calls.Controls.Add(this.groupBox1);
-            this.tabPage_calls.Controls.Add(this.button1);
-            this.tabPage_calls.Controls.Add(this.textBox1);
+            this.tabPage_calls.Controls.Add(this.button_call);
+            this.tabPage_calls.Controls.Add(this.textBox_call_address);
             this.tabPage_calls.Controls.Add(this.label1);
             this.tabPage_calls.Location = new System.Drawing.Point(4, 44);
             this.tabPage_calls.Name = "tabPage_calls";
@@ -89,7 +89,7 @@
             this.groupBox1.Controls.Add(this.label_status);
             this.groupBox1.Controls.Add(this.label_status_message);
             this.groupBox1.Location = new System.Drawing.Point(17, 118);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(14, 14, 14, 14);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(14);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(509, 363);
             this.groupBox1.TabIndex = 5;
@@ -118,23 +118,24 @@
             this.label_status_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.label_status_message.Click += new System.EventHandler(this.label_status_message_Click);
             // 
-            // button1
+            // button_call
             // 
-            this.button1.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(10, 63);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(131, 36);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Call";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button_call.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_call.Location = new System.Drawing.Point(10, 63);
+            this.button_call.Name = "button_call";
+            this.button_call.Size = new System.Drawing.Size(131, 36);
+            this.button_call.TabIndex = 2;
+            this.button_call.Text = "Call";
+            this.button_call.UseVisualStyleBackColor = true;
+            this.button_call.Click += new System.EventHandler(this.button_call_Click);
             // 
-            // textBox1
+            // textBox_call_address
             // 
-            this.textBox1.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(10, 31);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(275, 22);
-            this.textBox1.TabIndex = 1;
+            this.textBox_call_address.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_call_address.Location = new System.Drawing.Point(10, 31);
+            this.textBox_call_address.Name = "textBox_call_address";
+            this.textBox_call_address.Size = new System.Drawing.Size(275, 22);
+            this.textBox_call_address.TabIndex = 1;
             // 
             // label1
             // 
@@ -159,7 +160,6 @@
             this.tabPage_chats.TabIndex = 3;
             this.tabPage_chats.Text = "Chat";
             this.tabPage_chats.UseVisualStyleBackColor = true;
-            this.tabPage_chats.Click += new System.EventHandler(this.tabPage_chats_Click);
             // 
             // groupBox2
             // 
@@ -168,7 +168,7 @@
             this.groupBox2.Controls.Add(this.richTextBox1);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(14, 118);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(14, 14, 14, 14);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(14);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(516, 367);
             this.groupBox2.TabIndex = 6;
@@ -178,7 +178,7 @@
             // 
             this.button3.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.Location = new System.Drawing.Point(339, 294);
-            this.button3.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            this.button3.Margin = new System.Windows.Forms.Padding(12);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(161, 58);
             this.button3.TabIndex = 7;
@@ -314,9 +314,9 @@
         private System.Windows.Forms.TabPage tabPage_calls;
         private System.Windows.Forms.TabPage tabPage_chats;
         private System.Windows.Forms.Label label_login;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox_call_address;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button_call;
         private System.Windows.Forms.RichTextBox richTextBox_log;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox1;

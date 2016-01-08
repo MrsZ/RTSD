@@ -153,6 +153,9 @@ namespace LinphoneCoreWrapper
         public static extern void linphone_core_set_default_proxy_config(IntPtr lc, IntPtr cfg);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_core_invite(IntPtr lc, string uri);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr linphone_call_get_remote_address_as_string(IntPtr call);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -184,11 +187,9 @@ namespace LinphoneCoreWrapper
 
 
 		#endregion
-
 		class LinphoneCallPtr : Call
         {
             IntPtr ptr;
-
             public IntPtr Ptr
             {
                 get { return ptr;  }
@@ -342,6 +343,24 @@ namespace LinphoneCoreWrapper
 
             registration_state_changed = null;
             //call_state
+        }
+
+        public void makeCall(string uri)
+        {
+            if (linphoneCore == IntPtr.Zero || !running)
+            {
+                if (ErrorEvent != null)
+                    ErrorEvent(null, "Cannot make or receive calls.");
+                return;
+            }
+
+            IntPtr call = linphone_core_invite(linphoneCore, uri);
+
+            if (call == IntPtr.Zero)
+            {
+                if (ErrorEvent != null)
+                    ErrorEvent(null, "Cannot call.");
+            }
         }
 
         public delegate void RegistrationStateChangedDelegate(LinphoneRegistrationState state);

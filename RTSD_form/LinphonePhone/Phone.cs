@@ -156,7 +156,10 @@ namespace LinphonePhone
             if (string.IsNullOrEmpty(sipUriOrPhone))
                 throw new ArgumentNullException("sipUriOrPhone");
 
-            //if (line_state)
+            if (line_state == LineState.Free)
+                coreWrapper.makeCall(sipUriOrPhone);
+            else if (ErrorEvent != null)
+                ErrorEvent(null, Error.LineIsBusyError);
         }
-	}
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,9 @@ namespace RTSD_form
 {
     public partial class Form1 : Form
     {
+        public delegate void changeControlAvailability(bool boolean);
+        public delegate void changeLabelText(string text);
+
         Phone phone;
 		Account account;
 
@@ -25,14 +29,35 @@ namespace RTSD_form
             tabPage_chats.Enabled = false;
         }
 
-        private void tabPage_chats_Click(object sender, EventArgs e)
+        private void connectedEvent()
         {
-
+            tabPage_calls.Invoke(new changeControlAvailability(updateTabPageCallsAvailability), new object[] { true });
+            tabPage_chats.Invoke(new changeControlAvailability(updateTabPageChatsAvailability), new object[] { true });
+            label_login.Invoke(new changeLabelText(changeLoginText), new object[] { "Logged in as " + account.Username});
+            button_login_logout.Invoke(new changeControlAvailability(updateLoginAvailability), new object[] { true });
+        }
+        private void disconnectedEvent()
+        {
+            label_login.Invoke(new changeLabelText(changeLoginText), new object[] { "Not logged in." + button_login_logout.Text });
+            button_login_logout.Invoke(new changeControlAvailability(updateLoginAvailability), new object[] { true });
         }
 
-        private void label_login_Click(object sender, EventArgs e)
+        private void updateTabPageCallsAvailability(bool isAvailable)
         {
+            tabPage_calls.Enabled = isAvailable;
+        }
+        private void updateTabPageChatsAvailability(bool isAvailable)
+        {
+            tabPage_chats.Enabled = isAvailable;
+        }
+        private void updateLoginAvailability(bool isAvailable)
+        {
+            button_login_logout.Enabled = isAvailable;
+        }
 
+        private void changeLoginText(string text)
+        {
+            label_login.Text = text;
         }
 
         private void button_login_logout_Click(object sender, EventArgs e)
@@ -41,8 +66,9 @@ namespace RTSD_form
             {
                 tabPage_calls.Enabled = false;
                 tabPage_chats.Enabled = false;
-                label_login.Text = "Not logged in";
+                label_login.Text = "Logging out...";
                 button_login_logout.Text = "Login";
+                button_login_logout.Enabled = false;
                 return;
             }
 
@@ -54,19 +80,19 @@ namespace RTSD_form
                 {
 					if (login_dialog.textBox1.Text.Length != 0)
 					{
-						this.account = new LinphoneAccount.Account(
-							login_dialog.textBox1.Text,
-							login_dialog.textBox2.Text,
-							"sip.linphone.org");
-
+						this.account = new LinphoneAccount.Account(login_dialog.textBox1.Text,
+							                                       login_dialog.textBox2.Text,
+							                                       "sip.linphone.org");
+ 
 						this.phone = new Phone(this.account);
-						this.phone.Connect();
+                        phone.ConnectedEvent += delegate () { connectedEvent(); };
+                        phone.ConnectedEvent += delegate () { connectedEvent(); };
+                        this.phone.Connect();
 
-						tabPage_calls.Enabled = true;
-						tabPage_chats.Enabled = true;
-						label_login.Text = "Logged in as " + login_dialog.textBox1.Text;
-						button_login_logout.Text = "Logout";
-					}
+                        label_login.Text = "Connecting...";
+                        button_login_logout.Text = "Logout";
+                        button_login_logout.Enabled = false;
+                    }
 					break;
                 }
             }
@@ -75,6 +101,11 @@ namespace RTSD_form
         private void label_status_message_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void button_call_Click(object sender, EventArgs e)
+        {
+            phone.MakeCall(textBox_call_address.Text);
         }
     }
 }
