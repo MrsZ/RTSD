@@ -44,6 +44,8 @@
     <Compile Include="Account.cs" />
     <Compile Include="Call.cs" />
     <Compile Include="Chat.cs" />
+    <Compile Include="ChatRoom.cs" />
+    <Compile Include="ChatRoomHandler.cs" />
     <Compile Include="CoreWrapper.cs" />
     <Compile Include="Phone.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

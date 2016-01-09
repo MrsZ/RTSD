@@ -169,25 +169,40 @@ namespace LiblinphonedotNET
 		public static extern IntPtr linphone_core_get_chat_room_from_uri(IntPtr lc, string contact);
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr linphone_chat_room_create_message(IntPtr ChatRoom, string message);
+		public static extern IntPtr linphone_chat_room_create_message(IntPtr chat_room, string msg);
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void linphone_chat_room_send_chat_message(IntPtr ChatRoom, IntPtr ChatMessage);
+		public static extern void linphone_chat_room_send_chat_message(IntPtr chat_room, IntPtr msg);
 
-		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-		public static extern string linphone_chat_message_get_text(IntPtr ChatMessage);
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+		public static extern IntPtr linphone_chat_message_get_text(IntPtr msg);
 
-		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void linphone_chat_room_destroy(IntPtr ChatRoom);
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern long linphone_chat_message_get_time(IntPtr msg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void linphone_chat_room_destroy(IntPtr chat_room);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_chat_room_get_peer_address(IntPtr chat_room);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_chat_message_get_from_address(IntPtr msg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_chat_message_get_to_address(IntPtr msg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern IntPtr linphone_address_get_username(IntPtr address);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void LinphoneCoreRegistrationStateChangedCb(IntPtr lc, IntPtr cfg, LinphoneRegistrationState cstate, string msg);
 
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void LinphoneCoreRegistrationStateChangedCb(IntPtr lc, IntPtr cfg, LinphoneRegistrationState cstate, string message);
+		delegate void LinphoneCoreCallStateChangedCb(IntPtr lc, IntPtr call, LinphoneCallState cstate, string msg);
 
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void LinphoneCoreCallStateChangedCb(IntPtr lc, IntPtr call, LinphoneCallState cstate, string message);
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void LinphoneCoreMessageReceivedCb(IntPtr lc, IntPtr room, IntPtr message);
+		delegate void LinphoneCoreMessageReceivedCb(IntPtr lc, IntPtr room, IntPtr msg);
 
 
 		#endregion
@@ -202,33 +217,38 @@ namespace LiblinphonedotNET
         }
 
         public delegate void CallStateChangedDelegate(Call call);
-        public event CallStateChangedDelegate CallStateChangedEvent;
-
         public delegate void ErrorDelegate(Call call, string message);
+        public delegate void RegistrationStateChangedDelegate(LinphoneRegistrationState state);
+        public delegate void MessageReceivedDelegate(IntPtr chat_room, IntPtr msg);
+
+        public event CallStateChangedDelegate CallStateChangedEvent;
         public event ErrorDelegate ErrorEvent;
+        public event RegistrationStateChangedDelegate RegistrationStateChangedEvent;
+        public event MessageReceivedDelegate MessageReceivedEvent;
 
-		LinphoneCoreRegistrationStateChangedCb registration_state_changed;
-		LinphoneCoreCallStateChangedCb call_state_changed; // TODO. remember to add into vtable;
+
+        LinphoneCoreRegistrationStateChangedCb registration_state_changed;
+		LinphoneCoreCallStateChangedCb call_state_changed;
 		LinphoneCoreMessageReceivedCb message_received;
+
 		IntPtr linphoneCore;
-
-		IntPtr auth_info;
-		string identity;
-
-		LinphoneCoreVTable vtable;
+        LinphoneCoreVTable vtable;
         IntPtr vtablePtr;
-
         LCSipTransports t_config;
         IntPtr t_configPtr;
 
-        Thread core_loop;
-		bool running;
+        IntPtr auth_info;
+		string identity;
+
 
         IntPtr calls_default_params;
-
         IntPtr proxy_cfg;
 
+        Thread core_loop;
+        bool running;
+
         List<LinphoneCallPtr> calls = new List<LinphoneCallPtr>();
+
         LinphoneCallPtr FindCall(IntPtr call)
         {
             return calls.Find(delegate (LinphoneCallPtr obj) {
@@ -367,7 +387,7 @@ namespace LiblinphonedotNET
             }
         }
 
-		public IntPtr createChatRoom(string uri)
+		public IntPtr getChatRoom(string uri)
 		{
 			IntPtr chat_room = linphone_core_get_chat_room_from_uri(linphoneCore, uri);
 
@@ -383,25 +403,11 @@ namespace LiblinphonedotNET
 			linphone_chat_room_destroy(chat_room);
 		}
 
-		public void sendMessage(IntPtr chat_room, string msg)
-		{
-			IntPtr msg_to_send = linphone_chat_room_create_message(chat_room, msg);
-			linphone_chat_room_send_chat_message(chat_room, msg_to_send);
-		}
-
-		
-		public delegate void RegistrationStateChangedDelegate(LinphoneRegistrationState state);
-		public event RegistrationStateChangedDelegate RegistrationStateChangedEvent;
-
-		public delegate void MessageReceivedDelegate(string message);
-		public event MessageReceivedDelegate MessageReceivedEvent;
-
 		void OnMessageReceived(IntPtr lc, IntPtr chat_room, IntPtr msg)
 		{
-			//TODO: add functionality
-			string tmp = linphone_chat_message_get_text(msg);
-			if (MessageReceivedEvent != null) {
-				MessageReceivedEvent(tmp);
+			if (MessageReceivedEvent != null)
+            {
+				MessageReceivedEvent(chat_room, msg);
 			}
 		}
 

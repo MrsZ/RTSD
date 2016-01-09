@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace LiblinphonedotNET
 {
@@ -37,7 +38,7 @@ namespace LiblinphonedotNET
         public delegate void OnCallCompleted(Call call);
         public delegate void OnCallRinging(Call call);
         public delegate void OnError(Call call, Error error);
-		public delegate void MessageReceivedDelegate(string message);
+		public delegate void MessageReceivedDelegate(ChatRoom room, LinphoneMessage msg);
 
 		public event OnPhoneConnected ConnectedEvent;
         public event OnPhoneDisconnected DisconnectedEvent;
@@ -57,11 +58,13 @@ namespace LiblinphonedotNET
 		private string version {get; set;} = "0.1.0";
 
 		private CoreWrapper coreWrapper;
-		private IntPtr chat_room;
+
+        ChatRoomHandler chat_room_handler;
 
 		public Phone(Account account)
 		{
-			this.account = account;
+            this.chat_room_handler = new ChatRoomHandler();
+            this.account = account;
 			
 			this.coreWrapper = new CoreWrapper();
             this.coreWrapper.RegistrationStateChangedEvent += (CoreWrapper.LinphoneRegistrationState state) =>
@@ -103,7 +106,7 @@ namespace LiblinphonedotNET
                 if (ErrorEvent != null) ErrorEvent(call, Error.UnknownError);
             };
 
-			coreWrapper.MessageReceivedEvent += OnMessageReceived;
+			coreWrapper.MessageReceivedEvent += receiveMessage;
 
             //Seperate call state changed event into CallState events
             coreWrapper.CallStateChangedEvent += (Call call) =>
@@ -157,38 +160,57 @@ namespace LiblinphonedotNET
                 this.coreWrapper.createPhone(this.account.Username, this.account.Password, this.account.Server, this.account.Port, this.userAgent, this.version);
 			}
 		}
-
-        public void MakeCall(string sipUriOrPhone)
+        public void Disconnect()
         {
-            if (string.IsNullOrEmpty(sipUriOrPhone))
-                throw new ArgumentNullException("sipUriOrPhone");
+            this.coreWrapper.destroyPhone();
+        }
+
+        public void makeCall(string uri)
+        {
+            if (string.IsNullOrEmpty(uri))
+                throw new ArgumentNullException("uri");
 
             if (line_state == LineState.Free)
-                coreWrapper.makeCall(sipUriOrPhone);
+                coreWrapper.makeCall(uri);
             else if (ErrorEvent != null)
                 ErrorEvent(null, Error.LineIsBusyError);
         }
 
-		public void CreateChatRoom(string uri)
+		public void sendMessage(string uri, string raw_message)
 		{
-			if (string.IsNullOrEmpty(uri))
-				throw new ArgumentNullException("uri");
-			this.chat_room = coreWrapper.createChatRoom(uri);
+            if (string.IsNullOrEmpty(uri))
+                throw new ArgumentNullException("uri");
+
+            if (raw_message.Length == 0)
+                return;
+
+            IntPtr chat_room = coreWrapper.getChatRoom(uri);
+            IntPtr message = CoreWrapper.linphone_chat_room_create_message(chat_room, raw_message);
+            chat_room_handler.receiveMessage(uri.Split('@')[0].Split(':')[1], chat_room, message);
+			CoreWrapper.linphone_chat_room_send_chat_message(chat_room, message);
 		}
 
-		public void SendMessage(string message)
+		public void receiveMessage(IntPtr chat_room, IntPtr message)
 		{
-			if (message.Length != 0) {
-				coreWrapper.sendMessage(this.chat_room, message);
-			}
-		}
-
-		public void OnMessageReceived(string msg)
-		{
-			if (MessageReceivedEvent != null)
+            chat_room_handler.receiveMessage(getSenderUsername(message), chat_room, message);
+            if (MessageReceivedEvent != null)
 			{
-				MessageReceivedEvent(msg);
+                ChatRoom updated_chat_room = chat_room_handler.getChatRoom(chat_room);
+                MessageReceivedEvent(updated_chat_room, updated_chat_room.getMessage(updated_chat_room.Count() - 1));
 			}
 		}
+
+        public ChatRoom getCurrentChatRoom(string uri)
+        {
+            IntPtr chat_room = coreWrapper.getChatRoom(uri);
+            return chat_room_handler.getChatRoom(chat_room);
+        }
+
+        private string getSenderUsername(IntPtr message)
+        {
+            IntPtr address = CoreWrapper.linphone_chat_message_get_from_address(message);
+            IntPtr username = CoreWrapper.linphone_address_get_username(address);
+            return Marshal.PtrToStringAnsi(username);
+        }
 	}
 }
