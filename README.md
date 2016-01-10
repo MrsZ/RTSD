@@ -27,14 +27,14 @@ Based on and extends the functionality of the github project [sipdotnet](https:/
 	Disconnect();
 	
 	//Callbacks
-	OnPhoneConnected();
-	OnPhoneDisconnected();
-	OnIncomingCall(Call call);
-	OnCallRinging(Call call);
-	OnCallActive(Call call);
-	OnCallCompleted(Call call);
-	OnCallError(Call call, Error error);
-	OnMessageReceived(Chatroom room, LinphoneMessage message);
+	ConnectedEvent();
+	DisconnectedEvent();
+	CallIncomingEvent(Call call);
+	CallRingingEvent(Call call);
+	CallActiveEvent(Call call);
+	CallCompletedEvent(Call call);
+	CallErrorEvent(Call call, Error error);
+	MessageReceivedEvent(Chatroom room, LinphoneMessage message);
     		
    	//Actions
    	makeCall(string uri)
