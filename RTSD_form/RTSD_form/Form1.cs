@@ -76,7 +76,11 @@ namespace RTSD_form
         }
         private void CallProgress(Call call)
         {
-            label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Speaking with " + call.from });
+            if (call.call_type == Call.CallType.Incoming)
+                label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Speaking with " + call.from });
+            else
+                label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Speaking with " + call.to });
+
             button_answer.Invoke(new changeButtonAvailability(changeAnswerAvailability), new object[] { false });
             button_hangup.Invoke(new changeButtonAvailability(changeHangupAvailability), new object[] { true });
         }

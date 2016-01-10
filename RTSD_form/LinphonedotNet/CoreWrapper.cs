@@ -470,7 +470,7 @@ namespace LiblinphonedotNET
         {
             try
             {
-                linphone_core_terminate_call(linphoneCore, ((LinphoneCall)call).ptr);
+                linphone_core_terminate_all_calls(linphoneCore);
             }
             catch (Exception e)
             {
@@ -541,21 +541,31 @@ namespace LiblinphonedotNET
             string from = "";
             string to = "";
             string peer_name = nameFromAddress(linphone_call_get_remote_address(call));
-            IntPtr addressStringPtr = linphone_call_get_remote_address_as_string(call);
-            if (addressStringPtr != IntPtr.Zero)
-                from = Marshal.PtrToStringAnsi(addressStringPtr);
-            to = this.identity;
+            IntPtr addressStringPtr;
 
             // detecting direction, state and source-destination data by state
             switch (cstate)
             {
                 case LinphoneCallState.LinphoneCallIncomingReceived:
                     newstate = Call.State.IncomingRinging;
+                    newtype = Call.CallType.Incoming;
+                    addressStringPtr = linphone_call_get_remote_address_as_string(call);
+                    if (addressStringPtr != IntPtr.Zero)
+                    {
+                        from = Marshal.PtrToStringAnsi(addressStringPtr);
+                        to = this.identity;
+                    }
                     break;
 
                 case LinphoneCallState.LinphoneCallIncomingEarlyMedia:
                     newstate = Call.State.IncomingEarlyMedia;
                     newtype = Call.CallType.Incoming;
+                    addressStringPtr = linphone_call_get_remote_address_as_string(call);
+                    if (addressStringPtr != IntPtr.Zero)
+                    {
+                        from = Marshal.PtrToStringAnsi(addressStringPtr);
+                        to = this.identity;
+                    }
                     break;
 
                 case LinphoneCallState.LinphoneCallConnected:
@@ -576,6 +586,12 @@ namespace LiblinphonedotNET
 
                 case LinphoneCallState.LinphoneCallOutgoingInit:
                     newstate = Call.State.OutgoingStart;
+                    addressStringPtr = linphone_call_get_remote_address_as_string(call);
+                    if (addressStringPtr != IntPtr.Zero)
+                    {
+                        from = this.identity;
+                        to = Marshal.PtrToStringAnsi(addressStringPtr);
+                    }
                     break;
 
                 case LinphoneCallState.LinphoneCallOutgoingProgress:
@@ -583,8 +599,7 @@ namespace LiblinphonedotNET
                     break;
 
                 case LinphoneCallState.LinphoneCallOutgoingRinging:
-                    newstate = Call.State.OutgoingRinging;
-                        
+                    newstate = Call.State.OutgoingRinging;   
                     break;
 
                 case LinphoneCallState.LinphoneCallOutgoingEarlyMedia:
@@ -592,8 +607,10 @@ namespace LiblinphonedotNET
                     newtype = Call.CallType.Outcoming;
                     addressStringPtr = linphone_call_get_remote_address_as_string(call);
                     if (addressStringPtr != IntPtr.Zero)
-                        to = Marshal.PtrToStringAnsi(addressStringPtr);
+                    {
                         from = this.identity;
+                        to = Marshal.PtrToStringAnsi(addressStringPtr);
+                    }
                     break;
 
                 case LinphoneCallState.LinphoneCallError:
@@ -602,10 +619,12 @@ namespace LiblinphonedotNET
 
                 case LinphoneCallState.LinphoneCallReleased:
                     newstate = Call.State.Released;
+                    
                     break;
 
                 case LinphoneCallState.LinphoneCallEnd:
                     newstate = Call.State.Ended;
+                    //hangupCall(call);
                     if (linphone_call_params_get_record_file(calls_default_params) != IntPtr.Zero)
                         linphone_call_stop_recording(call);
                     break;
