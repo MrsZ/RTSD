@@ -121,6 +121,9 @@ namespace LiblinphonedotNET
         public static extern IntPtr linphone_core_create_call_params(IntPtr lc, IntPtr call);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_call_get_current_params(IntPtr lc, IntPtr call);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_call_params_enable_video(IntPtr calls_def_params, bool isEnabled);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -145,13 +148,19 @@ namespace LiblinphonedotNET
         public static extern void linphone_proxy_config_enable_register(IntPtr cfg, bool isEnabled);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool linphone_proxy_config_edit(IntPtr proxy_cfg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool linphone_proxy_config_done(IntPtr proxy_cfg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_core_add_proxy_config(IntPtr lc, IntPtr cfg);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_core_set_default_proxy_config(IntPtr lc, IntPtr cfg);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr linphone_core_invite(IntPtr lc, string uri);
+        public static extern IntPtr linphone_core_invite_with_params(IntPtr lc, string uri, IntPtr call_params);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr linphone_call_get_remote_address_as_string(IntPtr call);
@@ -164,6 +173,9 @@ namespace LiblinphonedotNET
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void linphone_core_accept_call(IntPtr lc, IntPtr call);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr linphone_call_get_remote_address(IntPtr call);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr linphone_core_get_chat_room_from_uri(IntPtr lc, string contact);
@@ -195,6 +207,23 @@ namespace LiblinphonedotNET
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr linphone_address_get_username(IntPtr address);
 
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void linphone_core_terminate_all_calls(IntPtr lc);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void linphone_call_params_destroy(IntPtr call_params);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool linphone_proxy_config_is_registered(IntPtr proxy_cfg);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool linphone_core_terminate_call(IntPtr lc, IntPtr call);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool linphone_core_decline_call(IntPtr lc, IntPtr call, IntPtr reason);
+
+
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void LinphoneCoreRegistrationStateChangedCb(IntPtr lc, IntPtr cfg, LinphoneRegistrationState cstate, string msg);
 
@@ -204,17 +233,15 @@ namespace LiblinphonedotNET
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void LinphoneCoreMessageReceivedCb(IntPtr lc, IntPtr room, IntPtr msg);
 
+        
 
 		#endregion
-		class LinphoneCallPtr : Call
+		class LinphoneCall : Call
         {
-            IntPtr ptr;
-            public IntPtr Ptr
-            {
-                get { return ptr;  }
-                set { this.ptr = value; }
-            }
+            public IntPtr ptr { get; set; }
         }
+
+
 
         public delegate void CallStateChangedDelegate(Call call);
         public delegate void ErrorDelegate(Call call, string message);
@@ -240,72 +267,123 @@ namespace LiblinphonedotNET
         IntPtr auth_info;
 		string identity;
 
-
         IntPtr calls_default_params;
         IntPtr proxy_cfg;
 
         Thread core_loop;
         bool running;
 
-        List<LinphoneCallPtr> calls = new List<LinphoneCallPtr>();
+        List<LinphoneCall> calls = new List<LinphoneCall>();
 
-        LinphoneCallPtr FindCall(IntPtr call)
+        LinphoneCall FindCall(IntPtr call)
         {
-            return calls.Find(delegate (LinphoneCallPtr obj) {
-                return (obj.Ptr == call);
+            return calls.Find(delegate (LinphoneCall obj) {
+                return (obj.ptr == call);
             });
+        }
+
+        void setTimeout(Action callback, int miliseconds)
+        {
+            System.Timers.Timer timeout = new System.Timers.Timer();
+            timeout.Interval = miliseconds;
+            timeout.AutoReset = false;
+            timeout.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) => {
+                callback();
+            };
+            timeout.Start();
         }
 
         public void createPhone(string username, string password, string server, int port, string agent, string version)
 		{
 			this.running = true;
-			this.registration_state_changed = new LinphoneCoreRegistrationStateChangedCb(OnRegistrationChanged);
-            this.call_state_changed = new LinphoneCoreCallStateChangedCb(OnCallStateChanged);
-			this.message_received = new LinphoneCoreMessageReceivedCb(OnMessageReceived);
-            this.vtable = new LinphoneCoreVTable()
-			{
-				global_state_changed = IntPtr.Zero,
-				registration_state_changed = Marshal.GetFunctionPointerForDelegate(registration_state_changed),
-				call_state_changed = Marshal.GetFunctionPointerForDelegate(call_state_changed),
-				notify_presence_received = IntPtr.Zero,
-				new_subscription_requested = IntPtr.Zero,
-				auth_info_requested = IntPtr.Zero,
-				call_log_updated = IntPtr.Zero,
-				message_received = Marshal.GetFunctionPointerForDelegate(message_received),
-				is_composing_received = IntPtr.Zero,
-				dtmf_received = IntPtr.Zero,
-				refer_received = IntPtr.Zero,
-				call_encryption_changed = IntPtr.Zero,
-				transfer_state_changed = IntPtr.Zero,
-				buddy_info_updated = IntPtr.Zero,
-				call_stats_updated = IntPtr.Zero,
-				info_received = IntPtr.Zero,
-				subscription_state_changed = IntPtr.Zero,
-				notify_received = IntPtr.Zero,
-				publish_state_changed = IntPtr.Zero,
-				configuring_status = IntPtr.Zero,
-				display_status = IntPtr.Zero,
-				display_message = IntPtr.Zero,
-				display_warning = IntPtr.Zero,
-				display_url = IntPtr.Zero,
-				show = IntPtr.Zero,
-				text_received = IntPtr.Zero,
-				file_transfer_recv = IntPtr.Zero,
-				file_transfer_send = IntPtr.Zero,
-				file_transfer_progress_indication = IntPtr.Zero,
-				network_reachable = IntPtr.Zero,
-				log_collection_upload_state_changed = IntPtr.Zero,
-				log_collection_upload_progress_indication = IntPtr.Zero
-			};
-			this.vtablePtr = Marshal.AllocHGlobal(Marshal.SizeOf(this.vtable));
-			Marshal.StructureToPtr(vtable, this.vtablePtr, false);
 
-			this.linphoneCore = linphone_core_new(this.vtablePtr, null, null, IntPtr.Zero);
+            initVTable();
+            initCore();
+            initAuthentication(username, password, server, port, agent, version);
+
+            calls_default_params = linphone_core_create_call_params(linphoneCore, IntPtr.Zero);
+            linphone_call_params_enable_video(calls_default_params, false);
+            linphone_call_params_enable_early_media_sending(calls_default_params, true); //Test if absolutely necessary
+        }
+        public void destroyPhone()
+        {
+            if (RegistrationStateChangedEvent != null)
+                RegistrationStateChangedEvent(LinphoneRegistrationState.LinphoneRegistrationProgress); // disconnecting
+
+            linphone_core_terminate_all_calls(linphoneCore);
+
+            setTimeout(delegate {
+                //Release calling params
+                linphone_call_params_destroy(calls_default_params);
+
+                if (linphone_proxy_config_is_registered(proxy_cfg))
+                {
+                    linphone_proxy_config_edit(proxy_cfg);
+                    linphone_proxy_config_enable_register(proxy_cfg, false);
+                    linphone_proxy_config_done(proxy_cfg);
+                }
+
+                //After this timeout the core will stop iterating
+                setTimeout(delegate {
+                    running = false;
+                }, 5000);
+
+            }, 5000);
+        }
+
+        private void initVTable()
+        {
+            this.registration_state_changed = new LinphoneCoreRegistrationStateChangedCb(OnRegistrationChanged);
+            this.call_state_changed = new LinphoneCoreCallStateChangedCb(OnCallStateChanged);
+            this.message_received = new LinphoneCoreMessageReceivedCb(OnMessageReceived);
+            this.vtable = new LinphoneCoreVTable()
+            {
+                global_state_changed = IntPtr.Zero,
+                registration_state_changed = Marshal.GetFunctionPointerForDelegate(registration_state_changed),
+                call_state_changed = Marshal.GetFunctionPointerForDelegate(call_state_changed),
+                notify_presence_received = IntPtr.Zero,
+                new_subscription_requested = IntPtr.Zero,
+                auth_info_requested = IntPtr.Zero,
+                call_log_updated = IntPtr.Zero,
+                message_received = Marshal.GetFunctionPointerForDelegate(message_received),
+                is_composing_received = IntPtr.Zero,
+                dtmf_received = IntPtr.Zero,
+                refer_received = IntPtr.Zero,
+                call_encryption_changed = IntPtr.Zero,
+                transfer_state_changed = IntPtr.Zero,
+                buddy_info_updated = IntPtr.Zero,
+                call_stats_updated = IntPtr.Zero,
+                info_received = IntPtr.Zero,
+                subscription_state_changed = IntPtr.Zero,
+                notify_received = IntPtr.Zero,
+                publish_state_changed = IntPtr.Zero,
+                configuring_status = IntPtr.Zero,
+                display_status = IntPtr.Zero,
+                display_message = IntPtr.Zero,
+                display_warning = IntPtr.Zero,
+                display_url = IntPtr.Zero,
+                show = IntPtr.Zero,
+                text_received = IntPtr.Zero,
+                file_transfer_recv = IntPtr.Zero,
+                file_transfer_send = IntPtr.Zero,
+                file_transfer_progress_indication = IntPtr.Zero,
+                network_reachable = IntPtr.Zero,
+                log_collection_upload_state_changed = IntPtr.Zero,
+                log_collection_upload_progress_indication = IntPtr.Zero
+            };
+            this.vtablePtr = Marshal.AllocHGlobal(Marshal.SizeOf(this.vtable));
+            Marshal.StructureToPtr(vtable, this.vtablePtr, false);
+        }
+        private void initCore()
+        {
+            this.linphoneCore = linphone_core_new(this.vtablePtr, null, null, IntPtr.Zero);
 
             core_loop = new Thread(LinphoneMainloop);
             core_loop.IsBackground = false;
             core_loop.Start();
-
+        }
+        private void initAuthentication(string username, string password, string server, int port, string agent, string version)
+        {
             t_config = new LCSipTransports()
             {
                 udp_port = -1,
@@ -319,10 +397,6 @@ namespace LiblinphonedotNET
             linphone_core_set_sip_transports(linphoneCore, t_configPtr);
             linphone_core_set_user_agent(linphoneCore, agent, version);
 
-            calls_default_params = linphone_core_create_call_params(linphoneCore, IntPtr.Zero);
-            linphone_call_params_enable_video(calls_default_params, false);
-            linphone_call_params_enable_early_media_sending(calls_default_params, true); //Test if absolutely necessary
-
             identity = "sip:" + username + "@" + server;
             server = "sip:" + server + ":" + port.ToString();
 
@@ -335,17 +409,7 @@ namespace LiblinphonedotNET
             linphone_proxy_config_enable_register(proxy_cfg, true);
             linphone_core_add_proxy_config(linphoneCore, proxy_cfg);
             linphone_core_set_default_proxy_config(linphoneCore, proxy_cfg);
-        }
-			
-		public void destroyPhone()
-		{
-			if (this.RegistrationStateChangedEvent != null)
-			{
-				this.RegistrationStateChangedEvent(LinphoneRegistrationState.LinphoneRegistrationProgress);
-			}
-
-			// TODO: terminate and destroy everything.
-		}
+        }	
 
         public void LinphoneMainloop()
         {
@@ -378,12 +442,50 @@ namespace LiblinphonedotNET
                 return;
             }
 
-            IntPtr call = linphone_core_invite(linphoneCore, uri);
+            IntPtr call = linphone_core_invite_with_params(linphoneCore, uri, calls_default_params);
+            //IntPtr call_params = linphone_call_get_current_params(linphoneCore, call);
+            //linphone_call_params_enable_video(call_params, false);
 
             if (call == IntPtr.Zero)
             {
                 if (ErrorEvent != null)
                     ErrorEvent(null, "Cannot call.");
+            }
+        }
+        public void answerCall(Call call)
+        {
+            try
+            {
+                linphone_core_accept_call(linphoneCore, ((LinphoneCall)call).ptr);//, calls_default_params);
+                //IntPtr call_params = linphone_call_get_current_params(linphoneCore, ((LinphoneCall)call).ptr);
+                //linphone_call_params_enable_video(call_params, false);
+
+            }
+            catch (Exception e)
+            {
+                ErrorEvent(call, "Could not cast Call into LinphoneCall.");
+            }
+        }
+        public void hangupCall(Call call)
+        {
+            try
+            {
+                linphone_core_terminate_call(linphoneCore, ((LinphoneCall)call).ptr);
+            }
+            catch (Exception e)
+            {
+                ErrorEvent(call, "Could not cast Call into LinphoneCall.");
+            }
+        }
+        public void declineCall(Call call)
+        {
+            try
+            {
+                linphone_core_decline_call(linphoneCore, ((LinphoneCall)call).ptr, IntPtr.Zero);
+            }
+            catch (Exception e)
+            {
+                ErrorEvent(call, "Could not cast Call into LinphoneCall.");
             }
         }
 
@@ -434,47 +536,64 @@ namespace LiblinphonedotNET
             Console.WriteLine("OnCallStateChanged: {0}", cstate);
             #endif
 
-            Call.State newstate = Call.State.None;
+            Call.State newstate = Call.State.Idle;
             Call.CallType newtype = Call.CallType.None;
             string from = "";
             string to = "";
-            IntPtr addressStringPtr;
+            string peer_name = nameFromAddress(linphone_call_get_remote_address(call));
+            IntPtr addressStringPtr = linphone_call_get_remote_address_as_string(call);
+            if (addressStringPtr != IntPtr.Zero)
+                from = Marshal.PtrToStringAnsi(addressStringPtr);
+            to = this.identity;
 
             // detecting direction, state and source-destination data by state
             switch (cstate)
             {
                 case LinphoneCallState.LinphoneCallIncomingReceived:
-                    newstate = Call.State.Ringing;
-                    linphone_core_accept_call(linphoneCore, call);
+                    newstate = Call.State.IncomingRinging;
                     break;
 
                 case LinphoneCallState.LinphoneCallIncomingEarlyMedia:
-                    newstate = Call.State.Loading;
+                    newstate = Call.State.IncomingEarlyMedia;
                     newtype = Call.CallType.Incoming;
-                    addressStringPtr = linphone_call_get_remote_address_as_string(call);
-                    if (addressStringPtr != IntPtr.Zero) from = Marshal.PtrToStringAnsi(addressStringPtr);
-                        to = identity;
                     break;
 
                 case LinphoneCallState.LinphoneCallConnected:
+                    newstate = Call.State.Connected;
+                    break;
+
                 case LinphoneCallState.LinphoneCallStreamsRunning:
+                    newstate = Call.State.StreamsRunning;
+                    break;
+
                 case LinphoneCallState.LinphoneCallPausedByRemote:
+                    newstate = Call.State.PausedByRemote;
+                    break;
+
                 case LinphoneCallState.LinphoneCallUpdatedByRemote:
-                    newstate = Call.State.Active;
+                    newstate = Call.State.UpdatedByRemote;
                     break;
 
                 case LinphoneCallState.LinphoneCallOutgoingInit:
+                    newstate = Call.State.OutgoingStart;
+                    break;
+
                 case LinphoneCallState.LinphoneCallOutgoingProgress:
+                    newstate = Call.State.InProgress;
+                    break;
+
                 case LinphoneCallState.LinphoneCallOutgoingRinging:
-                    newstate = Call.State.Ringing;
+                    newstate = Call.State.OutgoingRinging;
+                        
                     break;
 
                 case LinphoneCallState.LinphoneCallOutgoingEarlyMedia:
-                    newstate = Call.State.Loading;
+                    newstate = Call.State.OutgoingEarlyMedia;
                     newtype = Call.CallType.Outcoming;
                     addressStringPtr = linphone_call_get_remote_address_as_string(call);
-                    if (addressStringPtr != IntPtr.Zero) to = Marshal.PtrToStringAnsi(addressStringPtr);
-                    from = this.identity;
+                    if (addressStringPtr != IntPtr.Zero)
+                        to = Marshal.PtrToStringAnsi(addressStringPtr);
+                        from = this.identity;
                     break;
 
                 case LinphoneCallState.LinphoneCallError:
@@ -482,8 +601,11 @@ namespace LiblinphonedotNET
                     break;
 
                 case LinphoneCallState.LinphoneCallReleased:
+                    newstate = Call.State.Released;
+                    break;
+
                 case LinphoneCallState.LinphoneCallEnd:
-                    newstate = Call.State.Completed;
+                    newstate = Call.State.Ended;
                     if (linphone_call_params_get_record_file(calls_default_params) != IntPtr.Zero)
                         linphone_call_stop_recording(call);
                     break;
@@ -493,15 +615,16 @@ namespace LiblinphonedotNET
             }
 
             //Change the calls state or create a new call if it doesn't exist yet
-            LinphoneCallPtr existCall = FindCall(call);
+            LinphoneCall existCall = FindCall(call);
             if (existCall == null)
             {
-                existCall = new LinphoneCallPtr();
+                existCall = new LinphoneCall();
                 existCall.state = newstate;
                 existCall.call_type = newtype;
                 existCall.from = from;
                 existCall.to = to;
-                existCall.Ptr = call;
+                existCall.ptr = call;
+                existCall.peer_name = peer_name;
 
                 calls.Add(existCall);
 
@@ -516,6 +639,12 @@ namespace LiblinphonedotNET
                     CallStateChangedEvent(existCall);
                 }
             }
+        }
+
+        private string nameFromAddress(IntPtr address)
+        {
+            IntPtr username = linphone_address_get_username(address);
+            return Marshal.PtrToStringAnsi(username);
         }
     }
 }

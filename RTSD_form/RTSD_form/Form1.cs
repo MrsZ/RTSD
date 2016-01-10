@@ -18,10 +18,12 @@ namespace RTSD_form
         string current_combobox_selection = "";
         bool logged_in = false;
 
-        public delegate void changeControlAvailability(bool boolean);
+        public delegate void changeControlAvailability(bool isAvailable);
         public delegate void changeLabelText(string text);
         public delegate void changeRichTextboxText(string text);
         public delegate void appendComboboxItems(string text);
+        public delegate void changeButtonAvailability(bool isAvailable);
+        public delegate void changeButtonText(string text);
 
         Phone phone;
 		Account account;
@@ -41,13 +43,20 @@ namespace RTSD_form
             tabPage_chats.Invoke(new changeControlAvailability(updateTabPageChatsAvailability), new object[] { true });
             label_login.Invoke(new changeLabelText(changeLoginText), new object[] { "Logged in as " + account.Username });
             button_login_logout.Invoke(new changeControlAvailability(updateLoginAvailability), new object[] { true });
+            button_login_logout.Invoke(new changeButtonText(changeLoginButtonText), new object[] { "Logout" });
         }
         private void disconnectedEvent()
         {
             logged_in = false;
-            label_login.Invoke(new changeLabelText(changeLoginText), new object[] { "Not logged in." + button_login_logout.Text });
+            label_login.Invoke(new changeLabelText(changeLoginText), new object[] { "Not logged in." });
             button_login_logout.Invoke(new changeControlAvailability(updateLoginAvailability), new object[] { true });
+            button_login_logout.Invoke(new changeButtonText(changeLoginButtonText), new object[] { "Login" });
         }
+        private void failedLoginEvent(Phone.RegisterError error_type, string message)
+        {
+            disconnectedEvent();
+        }
+        //Chat
         private void chatMessageReceived(ChatRoom chat_room, LinphoneMessage message)
         {
             //Init combobox to the first sender if none present yet
@@ -57,6 +66,31 @@ namespace RTSD_form
             comboBox_chat_selection.Invoke(new appendComboboxItems(addToComboBoxIfNew), new object[] { message.sender });
             if (chat_room.getPartner().Equals(phone.getCurrentChatRoom("sip:" + current_combobox_selection + "@sip.linphone.org").getPartner()))
                 richTextBox_chat_log.Invoke(new changeRichTextboxText(changeLogText), new object[] { chat_room.getTextLog() });
+        }
+        //Calls
+        private void CallIncoming(Call call)
+        {
+            label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Incoming call from " + call.from });
+            button_answer.Invoke(new changeButtonAvailability(changeAnswerAvailability), new object[] { true });
+            button_hangup.Invoke(new changeButtonAvailability(changeHangupAvailability), new object[] { true });
+        }
+        private void CallProgress(Call call)
+        {
+            label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Speaking with " + call.from });
+            button_answer.Invoke(new changeButtonAvailability(changeAnswerAvailability), new object[] { false });
+            button_hangup.Invoke(new changeButtonAvailability(changeHangupAvailability), new object[] { true });
+        }
+        private void CallEnded(Call call)
+        {
+            label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Idle" });
+            button_answer.Invoke(new changeButtonAvailability(changeAnswerAvailability), new object[] { false });
+            button_hangup.Invoke(new changeButtonAvailability(changeHangupAvailability), new object[] { false });
+        }
+        private void Calling(Call call)
+        {
+            label_status_message.Invoke(new changeLabelText(changeStatusMessage), new object[] { "Calling " + call.to });
+            button_answer.Invoke(new changeButtonAvailability(changeAnswerAvailability), new object[] { false });
+            button_hangup.Invoke(new changeButtonAvailability(changeHangupAvailability), new object[] { true });
         }
         #endregion
 
@@ -81,7 +115,7 @@ namespace RTSD_form
                     return;
 
                 label_login.Text = "Connecting...";
-                button_login_logout.Text = "Logout";
+                button_login_logout.Text = "Logging in...";
                 button_login_logout.Enabled = false;
 
                 //Create account with the provided credentials
@@ -92,9 +126,15 @@ namespace RTSD_form
                 this.phone = new Phone(this.account);
 
                 //Link callbacks
-                phone.ConnectedEvent += connectedEvent;
-                phone.DisconnectedEvent += disconnectedEvent;
+                phone.connectedEvent += connectedEvent;
+                phone.disconnectedEvent += disconnectedEvent;
+                phone.loginErrorEvent += failedLoginEvent;
                 phone.MessageReceivedEvent += chatMessageReceived;
+
+                phone.IncomingRingingEvent += CallIncoming;
+                phone.StreamsRunningEvent += CallProgress;
+                phone.EndedEvent += CallEnded;
+                phone.OutgoingRingingEvent += Calling;
 
                 this.phone.Connect();
             }
@@ -112,6 +152,14 @@ namespace RTSD_form
         private void button_call_Click(object sender, EventArgs e)
         {
             phone.makeCall(textBox_call_address.Text);
+        }
+        private void button_hangup_Click(object sender, EventArgs e)
+        {
+            phone.hangupCall();
+        }
+        private void button_answer_Click(object sender, EventArgs e)
+        {
+            phone.answerCall();
         }
 
         private void comboBox_chat_selection_SelectedIndexChanged(object sender, EventArgs e)
@@ -185,6 +233,24 @@ namespace RTSD_form
         {
             richTextBox_chat_log.Text = text;
         }
-        #endregion 
+        private void changeAnswerAvailability(bool isAvailable)
+        {
+            button_answer.Enabled = isAvailable;
+        }
+        private void changeHangupAvailability(bool isAvailable)
+        {
+            button_hangup.Enabled = isAvailable;
+        }
+        private void changeStatusMessage(string message)
+        {
+            label_status_message.Text = message;
+        }
+        private void changeLoginButtonText(string message)
+        {
+            button_login_logout.Text = message;
+        }
+        #endregion
+
+
     }
 }

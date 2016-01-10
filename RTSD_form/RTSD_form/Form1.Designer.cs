@@ -48,6 +48,8 @@
             this.richTextBox_log = new System.Windows.Forms.RichTextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.button_login_logout = new System.Windows.Forms.Button();
+            this.button_answer = new System.Windows.Forms.Button();
+            this.button_hangup = new System.Windows.Forms.Button();
             this.tabControl.SuspendLayout();
             this.tabPage_calls.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -85,6 +87,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button_hangup);
+            this.groupBox1.Controls.Add(this.button_answer);
             this.groupBox1.Controls.Add(this.label_status);
             this.groupBox1.Controls.Add(this.label_status_message);
             this.groupBox1.Location = new System.Drawing.Point(17, 118);
@@ -106,20 +110,21 @@
             // 
             // label_status_message
             // 
+            this.label_status_message.AllowDrop = true;
             this.label_status_message.BackColor = System.Drawing.Color.Transparent;
             this.label_status_message.Font = new System.Drawing.Font("Times New Roman", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_status_message.ForeColor = System.Drawing.Color.OliveDrab;
             this.label_status_message.Location = new System.Drawing.Point(7, 72);
             this.label_status_message.Name = "label_status_message";
-            this.label_status_message.Size = new System.Drawing.Size(495, 288);
+            this.label_status_message.Size = new System.Drawing.Size(495, 218);
             this.label_status_message.TabIndex = 4;
-            this.label_status_message.Text = "Trolling";
+            this.label_status_message.Text = "Idle";
             this.label_status_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_call
             // 
             this.button_call.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_call.Location = new System.Drawing.Point(6, 59);
+            this.button_call.Location = new System.Drawing.Point(10, 59);
             this.button_call.Name = "button_call";
             this.button_call.Size = new System.Drawing.Size(131, 36);
             this.button_call.TabIndex = 2;
@@ -276,6 +281,30 @@
             this.button_login_logout.UseVisualStyleBackColor = true;
             this.button_login_logout.Click += new System.EventHandler(this.button_login_logout_Click);
             // 
+            // button_answer
+            // 
+            this.button_answer.Enabled = false;
+            this.button_answer.Location = new System.Drawing.Point(13, 300);
+            this.button_answer.Margin = new System.Windows.Forms.Padding(10);
+            this.button_answer.Name = "button_answer";
+            this.button_answer.Size = new System.Drawing.Size(160, 50);
+            this.button_answer.TabIndex = 5;
+            this.button_answer.Text = "Answer";
+            this.button_answer.UseVisualStyleBackColor = true;
+            this.button_answer.Click += new System.EventHandler(this.button_answer_Click);
+            // 
+            // button_hangup
+            // 
+            this.button_hangup.Enabled = false;
+            this.button_hangup.Location = new System.Drawing.Point(336, 300);
+            this.button_hangup.Margin = new System.Windows.Forms.Padding(10);
+            this.button_hangup.Name = "button_hangup";
+            this.button_hangup.Size = new System.Drawing.Size(160, 50);
+            this.button_hangup.TabIndex = 6;
+            this.button_hangup.Text = "Hang up";
+            this.button_hangup.UseVisualStyleBackColor = true;
+            this.button_hangup.Click += new System.EventHandler(this.button_hangup_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -324,6 +353,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button_login_logout;
         private System.Windows.Forms.ComboBox comboBox_chat_selection;
+        private System.Windows.Forms.Button button_answer;
+        private System.Windows.Forms.Button button_hangup;
     }
 }
 
