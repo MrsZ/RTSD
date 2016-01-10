@@ -7,8 +7,8 @@
     <ProjectGuid>{EC14448A-DF0D-4415-BA1F-F4A7426E2549}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LinphoneCoreWrapper</RootNamespace>
-    <AssemblyName>LinphoneCoreWrapper</AssemblyName>
+    <RootNamespace>LiblinphonedotNET</RootNamespace>
+    <AssemblyName>LiblinphonedotNET</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -41,14 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Account.cs" />
+    <Compile Include="Call.cs" />
+    <Compile Include="Chat.cs" />
+    <Compile Include="ChatRoom.cs" />
+    <Compile Include="ChatRoomHandler.cs" />
     <Compile Include="CoreWrapper.cs" />
+    <Compile Include="Phone.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LinphoneCall\LinphoneCall.csproj">
-      <Project>{474d7cf6-1616-4fb0-8834-00a169d751d9}</Project>
-      <Name>LinphoneCall</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

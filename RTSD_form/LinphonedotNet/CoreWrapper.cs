@@ -168,7 +168,7 @@ namespace LiblinphonedotNET
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr linphone_core_get_chat_room_from_uri(IntPtr lc, string contact);
 
-		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
 		public static extern IntPtr linphone_chat_room_create_message(IntPtr chat_room, string msg);
 
 		[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]

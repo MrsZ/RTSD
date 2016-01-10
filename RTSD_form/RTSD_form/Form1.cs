@@ -134,8 +134,9 @@ namespace RTSD_form
                 comboBox_chat_selection.SelectedIndex = selection_index;
 
             string target_username = (string)comboBox_chat_selection.SelectedItem;
-            byte[] message_bytes = Encoding.Default.GetBytes(richTextBox_compose_field.Text.);
-            string message_to_send = Encoding.UTF8.GetString(message_bytes);
+            //byte[] message_bytes = Encoding.Default.GetBytes(richTextBox_compose_field.Text);
+            //string message_to_send = Encoding.UTF8.GetString(message_bytes);
+            string message_to_send = richTextBox_compose_field.Text;
 
             if (string.IsNullOrEmpty(target_username))
                 throw new ArgumentNullException("target username");

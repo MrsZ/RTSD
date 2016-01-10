@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LinphoneAccount;
-using LinphoneCoreWrapper;
+using System.Runtime.InteropServices;
 
-using LinphoneCall;
-
-namespace LinphonePhone
+namespace LiblinphonedotNET
 {
 	public class Phone
 	{
@@ -37,34 +34,52 @@ namespace LinphonePhone
         public delegate void OnPhoneConnected();
         public delegate void OnPhoneDisconnected();
         public delegate void OnIncomingCall(Call call);
+        public delegate void OnCallRinging(Call call);
         public delegate void OnCallActive(Call call);
         public delegate void OnCallCompleted(Call call);
-        public delegate void OnCallRinging(Call call);
-        public delegate void OnError(Call call, Error error);
+        public delegate void OnCallError(Call call, Error error);
+		public delegate void OnMessageReceived(ChatRoom room, LinphoneMessage message);
 
-        public event OnPhoneConnected ConnectedEvent;
+		public event OnPhoneConnected ConnectedEvent;
         public event OnPhoneDisconnected DisconnectedEvent;
         public event OnIncomingCall CallIncomingEvent;
+        public event OnCallRinging CallRingingEvent;
         public event OnCallActive CallActiveEvent;
         public event OnCallCompleted CallCompletedEvent;
-        public event OnCallRinging CallRingingEvent;
-        public event OnError ErrorEvent;
+        public event OnCallError CallErrorEvent;
+		public event OnMessageReceived MessageReceivedEvent;
+
+        private string userAgent { get; set; } = "liblinphone";
+        private string version { get; set; } = "0.1.0";
 
         private ConnectState connectState;
         private LineState line_state;
 
 		public Account account {get;}
-
-		private string userAgent {get; set;} = "liblinphone";
-		private string version {get; set;} = "6.0.0";
-
 		private CoreWrapper coreWrapper;
+        private ChatRoomHandler chat_room_handler;
 
 		public Phone(Account account)
 		{
-			this.account = account;
-
+            this.chat_room_handler = new ChatRoomHandler();
+            this.account = account;
+			
 			this.coreWrapper = new CoreWrapper();
+            linkRegistrationStateChangedEventBody();
+            linkCallStateChangedEventBody();
+
+            //Create body for message callbacks from core
+            coreWrapper.MessageReceivedEvent += receiveMessage;
+
+            //Create body for error callbacks from core
+            coreWrapper.ErrorEvent += (call, message) =>
+            {
+                Console.WriteLine("Error: {0}!", message);
+                if (CallErrorEvent != null) CallErrorEvent(call, Error.UnknownError);
+            };
+		}
+        private void linkRegistrationStateChangedEventBody()
+        {
             this.coreWrapper.RegistrationStateChangedEvent += (CoreWrapper.LinphoneRegistrationState state) =>
             {
                 switch (state)
@@ -75,8 +90,8 @@ namespace LinphonePhone
 
                     case CoreWrapper.LinphoneRegistrationState.LinphoneRegistrationFailed:
                         coreWrapper.destroyPhone();
-                        if (ErrorEvent != null)
-                            ErrorEvent(null, Error.RegisterFailed);
+                        if (CallErrorEvent != null)
+                            CallErrorEvent(null, Error.RegisterFailed);
                         break;
 
                     case CoreWrapper.LinphoneRegistrationState.LinphoneRegistrationCleared:
@@ -96,19 +111,13 @@ namespace LinphonePhone
                         break;
                 }
             };
-
-            //Create body for error callbacks
-            coreWrapper.ErrorEvent += (call, message) =>
-            {
-                Console.WriteLine("Error: {0}!", message);
-                if (ErrorEvent != null) ErrorEvent(call, Error.UnknownError);
-            };
-
-            //Seperate call state changed event into CallState events
+        }
+        private void linkCallStateChangedEventBody()
+        {
+            //Seperate the single CallStateChangedEvent event from core into CallState events
             coreWrapper.CallStateChangedEvent += (Call call) =>
             {
                 Call.State state = call.state;
-
                 switch (state)
                 {
                     case Call.State.Active:
@@ -132,8 +141,8 @@ namespace LinphonePhone
 
                     case Call.State.Error:
                         line_state = LineState.Free;
-                        if (ErrorEvent != null)
-                            ErrorEvent(null, Error.CallError);
+                        if (CallErrorEvent != null)
+                            CallErrorEvent(null, Error.CallError);
                         if (CallCompletedEvent != null)
                             CallCompletedEvent(call);
                         break;
@@ -146,9 +155,16 @@ namespace LinphonePhone
                         break;
                 }
             };
-		}
+        }
 
-		public void Connect()
+        private string getSenderUsername(IntPtr message)
+        {
+            IntPtr address = CoreWrapper.linphone_chat_message_get_from_address(message);
+            IntPtr username = CoreWrapper.linphone_address_get_username(address);
+            return Marshal.PtrToStringAnsi(username);
+        }
+
+        public void Connect()
 		{
 			if (this.connectState == ConnectState.Disconnected)
 			{
@@ -156,16 +172,49 @@ namespace LinphonePhone
                 this.coreWrapper.createPhone(this.account.Username, this.account.Password, this.account.Server, this.account.Port, this.userAgent, this.version);
 			}
 		}
-
-        public void MakeCall(string sipUriOrPhone)
+        public void Disconnect()
         {
-            if (string.IsNullOrEmpty(sipUriOrPhone))
-                throw new ArgumentNullException("sipUriOrPhone");
+            this.coreWrapper.destroyPhone();
+        }
+
+        public void makeCall(string uri)
+        {
+            if (string.IsNullOrEmpty(uri))
+                throw new ArgumentNullException("uri");
 
             if (line_state == LineState.Free)
-                coreWrapper.makeCall(sipUriOrPhone);
-            else if (ErrorEvent != null)
-                ErrorEvent(null, Error.LineIsBusyError);
+                coreWrapper.makeCall(uri);
+            else if (CallErrorEvent != null)
+                CallErrorEvent(null, Error.LineIsBusyError);
         }
-    }
+
+		public void sendMessage(string uri, string raw_message)
+		{
+            if (string.IsNullOrEmpty(uri))
+                throw new ArgumentNullException("uri");
+
+            if (raw_message.Length == 0)
+                return;
+
+            IntPtr chat_room = coreWrapper.getChatRoom(uri);
+            IntPtr message = CoreWrapper.linphone_chat_room_create_message(chat_room, raw_message);
+            chat_room_handler.receiveMessage(uri.Split('@')[0].Split(':')[1], chat_room, message);
+			CoreWrapper.linphone_chat_room_send_chat_message(chat_room, message);
+		}
+		private void receiveMessage(IntPtr chat_room, IntPtr message)
+		{
+            chat_room_handler.receiveMessage(getSenderUsername(message), chat_room, message);
+            if (MessageReceivedEvent != null)
+			{
+                ChatRoom updated_chat_room = chat_room_handler.getChatRoom(chat_room);
+                MessageReceivedEvent(updated_chat_room, updated_chat_room.getMessage(updated_chat_room.Count() - 1));
+			}
+		}
+
+        public ChatRoom getCurrentChatRoom(string uri)
+        {
+            IntPtr chat_room = coreWrapper.getChatRoom(uri);
+            return chat_room_handler.getChatRoom(chat_room);
+        }
+	}
 }
