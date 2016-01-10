@@ -1,5 +1,5 @@
 # **RTSD**
-Repository for RTSD course programming exercise
+Repository for Real Time Something Software Development course programming exercise.
 RTSD contains two projects, LinphonedotNet and RTSD_form. 
 
 ##1. LinphonedotNet.dll
