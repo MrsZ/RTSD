@@ -22,25 +22,23 @@ Based on and extends the functionality of the github project [sipdotnet](https:/
 ** Optionally instead of step 2, you can set your system path so your computer automatically finds these libraries whenever necessary.*
 	
 ###Current functionality
-	```java
 	//Authentication
-	Connect()
-	Disconnect()
+	Connect();
+	Disconnect();
 	
 	//Callbacks
-	OnPhoneConnected()
-	OnPhoneDisconnected()
-	OnIncomingCall(Call call)
-	OnCallRinging(Call call)
-	OnCallActive(Call call)
-	OnCallCompleted(Call call)
-	OnCallError(Call call, Error error)
+	OnPhoneConnected();
+	OnPhoneDisconnected();
+	OnIncomingCall(Call call);
+	OnCallRinging(Call call);
+	OnCallActive(Call call);
+	OnCallCompleted(Call call);
+	OnCallError(Call call, Error error);
 	OnMessageReceived(Chatroom room, LinphoneMessage message);
     		
    	//Actions
    	makeCall(string uri)
    	sendMessage(string uri, string message);
-	```
 
 ##2. RTSD_form.dll
 
