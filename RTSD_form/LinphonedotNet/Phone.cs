@@ -321,8 +321,6 @@ namespace LiblinphonedotNET
         {
             if (current_call.state == Call.State.StreamsRunning)
                 core_wrapper.hangupCall(current_call);
-            if (current_call.state == Call.State.InProgress)
-                core_wrapper.hangupCall(current_call);
             if (current_call.state == Call.State.IncomingRinging)
                 core_wrapper.declineCall(current_call);
         }
@@ -345,7 +343,7 @@ namespace LiblinphonedotNET
             chat_room_handler.receiveMessage(getSenderUsername(message), chat_room, message);
             if (MessageReceivedEvent != null)
 			{
-                ChatRoom updated_chat_room = chat_room_handler.getChatRoom(chat_room);
+                ChatRoom updated_chat_room = chat_room_handler.findChatRoom(chat_room);
                 MessageReceivedEvent(updated_chat_room, updated_chat_room.getMessage(updated_chat_room.Count() - 1));
 			}
 		}
@@ -353,7 +351,7 @@ namespace LiblinphonedotNET
         public ChatRoom getCurrentChatRoom(string uri)
         {
             IntPtr chat_room = core_wrapper.getChatRoom(uri);
-            return chat_room_handler.getChatRoom(chat_room);
+            return chat_room_handler.findChatRoom(chat_room);
         }
 	}
 }

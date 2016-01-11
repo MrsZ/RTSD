@@ -16,62 +16,48 @@ namespace LiblinphonedotNET
             chat_rooms = new List<ChatRoom>();
         }
 
-        public void addChatRoom(string name, IntPtr chat_room)
-        {
-            if (findChatRoom(chat_room) == -1)
-                chat_rooms.Add(new ChatRoom(chat_room, name));
-        }
-
-        public void destroyChatRoom(IntPtr chat_room_param)
-        {
-            int chat_index = findChatRoom(chat_room_param);
-            if (chat_index != -1)
-                chat_rooms.RemoveAt(chat_index);
-        }
-
-        public int Count()
-        {
-            return chat_rooms.Count();
-        }
-        public string getText(int index)
-        {
-            return chat_rooms[index].getTextLog();
-        }
-
         /// <summary>
         /// Takes a "linphone chat room" and "linphone msg" as IntPtr:s and adds the msg to the correct ChatRoom 
         /// </summary>
         /// <param name="chat_room_param">linphone chat room IntPtr</param>
-        /// <param name="msg">linphone message IntPtr</param>
-        public void receiveMessage(string partner, IntPtr chat_room_param, IntPtr msg)
+        /// <param name="message">linphone message IntPtr</param>
+        public void receiveMessage(string peer, IntPtr chat_room_param, IntPtr message)
         {
-            int chat_index = findChatRoom(chat_room_param);
-            if (chat_index == -1)
+            ChatRoom chat_room = findChatRoom(chat_room_param);
+            if (chat_room == null)
             {
-                ChatRoom new_room = new ChatRoom(chat_room_param, partner);
-                new_room.addMessage(msg);
-                chat_rooms.Add(new_room);
+                chat_room = new ChatRoom(chat_room_param, peer);
+                chat_room.addMessage(message);
+                chat_rooms.Add(chat_room);
             }
             else
             {
-                chat_rooms[chat_index].addMessage(msg);
+                chat_room.addMessage(message);
             }
         }
 
-        public ChatRoom getChatRoom(IntPtr chat_room)
+        //Collection controls
+        public int Count()
         {
-            int chat_index = findChatRoom(chat_room);
-            if (chat_index != -1)
-                return chat_rooms[chat_index];
-            return null;
+            return chat_rooms.Count();
         }
-
-        private int findChatRoom(IntPtr chat_room_param)
+        public ChatRoom findChatRoom(IntPtr chat_room_param)
         {
             for (int iterator = 0; iterator < chat_rooms.Count; iterator++)
                 if (chat_rooms[iterator].isSame(chat_room_param))
-                    return iterator;
-            return -1;
+                    return chat_rooms[iterator];
+            return null;
+        }
+        public void destroyChatRoom(IntPtr chat_room_param)
+        {
+            for (int iterator = 0; iterator < chat_rooms.Count; iterator++)
+                if (chat_rooms[iterator].isSame(chat_room_param))
+                    chat_rooms.RemoveAt(iterator);
+        }
+        public void addChatRoom(string name, IntPtr chat_room)
+        {
+            if (findChatRoom(chat_room) == null)
+                chat_rooms.Add(new ChatRoom(chat_room, name));
         }
     }
 }

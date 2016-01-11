@@ -10,7 +10,8 @@ namespace LiblinphonedotNET
 {
     public class CoreWrapper
     {
-		#region Import
+
+        #region structures and enums
         private const string LIBRARY_NAME = "Linphone.dll";
 
         struct LCSipTransports
@@ -101,7 +102,8 @@ namespace LiblinphonedotNET
 			public IntPtr log_collection_upload_state_changed; // Callback to upload collected logs
 			public IntPtr log_collection_upload_progress_indication; // Callback to indicate log collection upload progress
 		};
-
+        #endregion
+        #region Import
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void linphone_core_destroy(IntPtr lc);
 
@@ -217,10 +219,13 @@ namespace LiblinphonedotNET
         public static extern bool linphone_proxy_config_is_registered(IntPtr proxy_cfg);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool linphone_core_terminate_call(IntPtr lc, IntPtr call);
+        public static extern int linphone_core_terminate_call(IntPtr lc, IntPtr call);
 
         [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool linphone_core_decline_call(IntPtr lc, IntPtr call, IntPtr reason);
+        public static extern int linphone_call_unref(IntPtr call);
+
+        [DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int linphone_core_decline_call(IntPtr lc, IntPtr call, IntPtr reason);
 
 
 
@@ -240,8 +245,6 @@ namespace LiblinphonedotNET
         {
             public IntPtr ptr { get; set; }
         }
-
-
 
         public delegate void CallStateChangedDelegate(Call call);
         public delegate void ErrorDelegate(Call call, string message);
@@ -459,7 +462,6 @@ namespace LiblinphonedotNET
                 linphone_core_accept_call(linphoneCore, ((LinphoneCall)call).ptr);//, calls_default_params);
                 //IntPtr call_params = linphone_call_get_current_params(linphoneCore, ((LinphoneCall)call).ptr);
                 //linphone_call_params_enable_video(call_params, false);
-
             }
             catch (Exception e)
             {
@@ -470,7 +472,12 @@ namespace LiblinphonedotNET
         {
             try
             {
-                linphone_core_terminate_all_calls(linphoneCore);
+                linphone_core_terminate_call(linphoneCore, ((LinphoneCall)call).ptr);
+                setTimeout(delegate
+                {
+                    //Release calling params
+                    linphone_call_unref(((LinphoneCall)call).ptr);
+                }, 1000);
             }
             catch (Exception e)
             {
@@ -482,6 +489,11 @@ namespace LiblinphonedotNET
             try
             {
                 linphone_core_decline_call(linphoneCore, ((LinphoneCall)call).ptr, IntPtr.Zero);
+                setTimeout(delegate
+                {
+                    //Release calling params
+                    linphone_call_unref(((LinphoneCall)call).ptr);
+                }, 1000);
             }
             catch (Exception e)
             {

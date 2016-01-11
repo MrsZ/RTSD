@@ -20,7 +20,7 @@ namespace LiblinphonedotNET
             this.messages = new List<LinphoneMessage>();
         }
 
-        public string getPartner()
+        public string getPeer()
         {
             return name;
         }
@@ -83,10 +83,9 @@ namespace LiblinphonedotNET
             IntPtr address = CoreWrapper.linphone_chat_room_get_peer_address(chat_room_param);
             IntPtr display_name = CoreWrapper.linphone_address_get_username(address);
             string text = Marshal.PtrToStringAnsi(display_name);
-            string my_name = this.getPartner();
+            string my_name = this.getPeer();
             return text.Equals(my_name);
         }
-
     }
 
     public struct LinphoneMessage

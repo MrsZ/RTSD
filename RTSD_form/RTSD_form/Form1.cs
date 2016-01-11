@@ -64,7 +64,7 @@ namespace RTSD_form
                 current_combobox_selection = message.sender;
 
             comboBox_chat_selection.Invoke(new appendComboboxItems(addToComboBoxIfNew), new object[] { message.sender });
-            if (chat_room.getPartner().Equals(phone.getCurrentChatRoom("sip:" + current_combobox_selection + "@sip.linphone.org").getPartner()))
+            if (chat_room.getPeer().Equals(phone.getCurrentChatRoom("sip:" + current_combobox_selection + "@sip.linphone.org").getPeer()))
                 richTextBox_chat_log.Invoke(new changeRichTextboxText(changeLogText), new object[] { chat_room.getTextLog() });
         }
         //Calls
@@ -189,6 +189,7 @@ namespace RTSD_form
             //byte[] message_bytes = Encoding.Default.GetBytes(richTextBox_compose_field.Text);
             //string message_to_send = Encoding.UTF8.GetString(message_bytes);
             string message_to_send = richTextBox_compose_field.Text;
+            richTextBox_compose_field.Text = "";
 
             if (string.IsNullOrEmpty(target_username))
                 throw new ArgumentNullException("target username");
