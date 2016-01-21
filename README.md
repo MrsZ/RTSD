@@ -42,10 +42,10 @@ Based on and extends the functionality of the github project [sipdotnet](https:/
    	sendMessage(string uri, string message);
 
 ###Visual C++ Distributables
-2005 [https://www.microsoft.com/en-us/download/details.aspx?id=3387](https://www.microsoft.com/en-us/download/details.aspx?id=3387)
-2008 [https://www.microsoft.com/en-us/download/details.aspx?id=29](https://www.microsoft.com/en-us/download/details.aspx?id=29)
-2010 [https://www.microsoft.com/en-us/download/details.aspx?id=5555](https://www.microsoft.com/en-us/download/details.aspx?id=5555)
-2012 [https://www.microsoft.com/en-us/download/details.aspx?id=30679](https://www.microsoft.com/en-us/download/details.aspx?id=30679)
+1. 2005 [https://www.microsoft.com/en-us/download/details.aspx?id=3387](https://www.microsoft.com/en-us/download/details.aspx?id=3387)
+2. 2008 [https://www.microsoft.com/en-us/download/details.aspx?id=29](https://www.microsoft.com/en-us/download/details.aspx?id=29)
+3. 2010 [https://www.microsoft.com/en-us/download/details.aspx?id=5555](https://www.microsoft.com/en-us/download/details.aspx?id=5555)
+4. 2012 [https://www.microsoft.com/en-us/download/details.aspx?id=30679](https://www.microsoft.com/en-us/download/details.aspx?id=30679)
 
 ##2. RTSD_form.dll
 
